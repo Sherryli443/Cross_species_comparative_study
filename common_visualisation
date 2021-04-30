@@ -1,0 +1,27 @@
+%load json file of cell detections on a brain image
+J183 = loadjson("M826-F111--_1_0183.json");
+%show the image
+imshow(uint8(img183)*2);
+hold on 
+%extract the coordinates of cell detections
+cellx = J183.features{1,1}.geometry.coordinates(:,2)*-1;
+celly = J183.features{1,1}.geometry.coordinates(:,1);
+%overlap the coordinates on the brain image
+plot(celly,cellx,'om');
+%load the atlas mapping result
+J = loadjson("atlas-seg_to_M826-F111--_1_0183.geojson");
+
+%load the atlas mapping segmentation as well as its associated brain region names.
+for i = 1 : length(J.features)
+if length(J.features{1,i}.geometry.coordinates(:,1))
+x = J.features{1,i}.geometry.coordinates(:,1)/0.92+14000;
+y = J.features{1,i}.geometry.coordinates(:,2)/0.92+11000;
+pgon = polyshape(x,y);
+[Cx Cy] = centroid(pgon);
+ID = str2double(J.features{1,i}.id) + 10000;
+left = str2double(J.features{1,i}.id) 
+name = marmosetlist(find([marmosetlist{:,4}] == left),2);
+text(Cx, Cy, name,'Color','white');
+plot(pgon);
+end
+end
