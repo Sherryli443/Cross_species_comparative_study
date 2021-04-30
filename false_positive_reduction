@@ -1,0 +1,108 @@
+%if work on the remote cluster:
+dirJP2 = 'JP2';
+dirjson = 'jsonF';
+dirout = 'jsonF_mod';
+mkdir(dirout);
+addpath(genpath('jsonlab-2.0'));
+fileJP2 = dir(fullfile(dirJP2,'*F*.jp2'));
+for files = 1:length(fileJP2)
+    img121 = imread(fullfile(dirJP2,fileJP2(files).name));
+    J121 = loadjson(fullfile(dirjson,strrep(fileJP2(files).name,'jp2','json')));
+    
+    
+    %load json file of an image
+    %J121 = loadjson('M826-F61--_1_0121.json'); %to see the coordinates go to J.features{1, 1}.geometry.coordinates
+    y = J121.features{1,1}.geometry.coordinates(:,1);
+    x = J121.features{1,1}.geometry.coordinates(:,2)*-1;
+    
+    %load image 121 from the left hand column and change the name to img121
+    
+    %to make the image visible
+    %imshow(uint8(img121))
+    %hold on
+    %to overlap the cell detection results on the image
+    %plot(y,x,'*r')
+    
+    xyrgb = zeros(length(x),3);
+    for n=1:length(x)
+        x(n,1) = x(n);
+        xyrgb(n,1) = x(n,1);
+        y(n,1) = y(n);
+        xyrgb(n,2) = y(n,1);
+        B(n,1) = img121(x(n),y(n),3);
+        xyrgb(n,3)=B(n,1);
+          R(n,1) = img121(x(n),y(n),1)
+        xyrgb(n,4)=R(n,1)
+         G(n,1) = img121(x(n),y(n),2)
+        xyrgb(n,5)=G(n,1) 
+    end
+    
+    %bluesort = sort(xyrgb(:,end),'ascend')
+    %threshold 60 on blue channel seems to be ideal
+    rgb60 = xyrgb(xyrgb(:,3)>60,:);
+    
+    %imshow(uint8(img121))
+    %hold on
+    %plot(rgb60(:,2),rgb60(:,1),'*r')
+    
+    %save the filtered json output
+    json60=rgb60(:,[1,2]);
+    J121.features{1, 1}.geometry.coordinates = json60;
+    savejson('',J121,fullfile(dirout,strrep(fileJP2(files).name,'jp2','json')));
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%If work on interactive data analysis
+
+%load the image json file
+J121 = loadjson('M826-F111--_1_0121.json');
+%load image 183
+img121 = imread('M826-F61--_1_0121.jp2')
+%extract the y and x coordinates of the detected points
+y = J121.features{1,1}.geometry.coordinates(:,1);
+x = J121.features{1,1}.geometry.coordinates(:,2)*-1;
+
+J121 = loadjson('M826-F88--_1_0160.json');
+y121 = J121.features{1,1}.geometry.coordinates(:,1);
+x121 = J121.features{1,1}.geometry.coordinates(:,2)*-1;
+
+%extract the intensity of blue colour for all detected points
+ xyrgb = zeros(length(x),3);
+    for n=1:length(x)
+        x(n,1) = x(n);
+        xyrgb(n,1) = x(n,1);
+        y(n,1) = y(n);
+        xyrgb(n,2) = y(n,1);
+        %R(n,1) = img121(x(n),y(n),1)
+        %xyrgb(n,3)=R(n,1)
+        %G(n,1) = img121(x(n),y(n),2)
+        %xyrgb(n,4)=G(n,1)
+        B(n,1) = img183(x(n),y(n),3);
+        xyrgb(n,3)=B(n,1);
+    end
+    
+%sort them into ascending order    
+bluesort183 = sort(xyrgb(:,end),'ascend')
+
+%%image visualisation and thresholding
+
+%view the brain section 121
+imshow(uint8(img121));
+hold on;
+plot(y121,x121,'*r');
+
+%overlap the detection result on the section 121
+plot(y,x,'*r');
+    
+%a threshold value of 35 on blue colour eliminate maximum amount of false
+%positive without losing any true positive detection
+rgb35 = xyrgb(xyrgb(:,3)>35,:);
+plot(rgb60(:,2),rgb60(:,1),'<g');
+
+%plot the histogram
+histogram(xyrgb(:,3),313,'BinWidth',0.5,'EdgeColor','b','FaceColor','b')
+
+
+%sorting based on the intensity of blue colour 
+% %bluesort = sort(xyrgb(:,end),'ascend');
+hold off
