@@ -38,8 +38,8 @@ for files = 1:length(fileJP2)
     end
     
     %bluesort = sort(xyrgb(:,end),'ascend')
-    %threshold 60 on blue channel seems to be ideal
-    rgb60 = xyrgb(xyrgb(:,3)>60,:);
+    %threshold 39 on blue channel looks ideal
+    rgb39 = xyrgb(xyrgb(:,3)>60,:);
     
     %imshow(uint8(img121))
     %hold on
@@ -56,7 +56,7 @@ end
 
 %load the image json file
 J121 = loadjson('M826-F111--_1_0121.json');
-%load image 183
+%load image 121
 img121 = imread('M826-F61--_1_0121.jp2')
 %extract the y and x coordinates of the detected points
 y = J121.features{1,1}.geometry.coordinates(:,1);
@@ -96,8 +96,8 @@ plot(y,x,'*r');
     
 %a threshold value of 35 on blue colour eliminate maximum amount of false
 %positive without losing any true positive detection
-rgb35 = xyrgb(xyrgb(:,3)>35,:);
-plot(rgb60(:,2),rgb60(:,1),'<g');
+rgb39 = xyrgb(xyrgb(:,3)>39,:);
+plot(rgb39(:,2),rgb39(:,1),'<g');
 
 %plot the histogram
 histogram(xyrgb(:,3),313,'BinWidth',0.5,'EdgeColor','b','FaceColor','b')
